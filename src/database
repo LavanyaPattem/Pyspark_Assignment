@@ -1,0 +1,84 @@
+import psycopg2
+import logging
+from typing import Dict, Tuple
+
+class DatabaseManager:
+    def __init__(self, config: Dict):
+        self.config = config
+        self.conn = None
+        self.setup_database()
+    
+    def setup_database(self):
+        try:
+            self.conn = psycopg2.connect(**self.config)
+            cursor = self.conn.cursor()
+            
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS transaction_chunks (
+                    chunk_id VARCHAR(50) PRIMARY KEY,
+                    s3_path VARCHAR(500),
+                    processed BOOLEAN DEFAULT FALSE,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+            
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS pattern_detections (
+                    detection_id VARCHAR(50) PRIMARY KEY,
+                    y_start_time TIMESTAMP,
+                    detection_time TIMESTAMP,
+                    pattern_id VARCHAR(20),
+                    action_type VARCHAR(50),
+                    customer_name VARCHAR(100),
+                    merchant_id VARCHAR(50),
+                    processed BOOLEAN DEFAULT FALSE,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+            
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS merchant_stats (
+                    merchant_id VARCHAR(50),
+                    total_transactions BIGINT DEFAULT 0,
+                    male_customers INT DEFAULT 0,
+                    female_customers INT DEFAULT 0,
+                    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (merchant_id)
+                );
+            """)
+            
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS customer_merchant_stats (
+                    customer_name VARCHAR(100),
+                    merchant_id VARCHAR(50),
+                    transaction_count INT DEFAULT 0,
+                    total_amount DECIMAL(15,2) DEFAULT 0,
+                    avg_amount DECIMAL(15,2) DEFAULT 0,
+                    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (customer_name, merchant_id)
+                );
+            """)
+            
+            cursor.execute("""
+                UPDATE transaction_chunks SET processed = TRUE WHERE processed = FALSE;
+            """)
+            
+            self.conn.commit()
+            cursor.close()
+            logging.info("Database setup completed successfully")
+            
+        except Exception as e:
+            logging.error(f"Database setup failed: {str(e)}")
+            raise
+    
+    def execute_query(self, query: str, params: Tuple = None):
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute(query, params)
+            if query.strip().upper().startswith('SELECT'):
+                return cursor.fetchall()
+            else:
+                self.conn.commit()
+                return cursor.rowcount
+        finally:
+            cursor.close()

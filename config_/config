@@ -1,0 +1,35 @@
+import os
+import pytz
+
+class Config:
+    # AWS Configuration
+    AWS_REGION = 'us-east-1'
+    S3_BUCKET = 'pyspark-assignment-lavanya'
+    S3_INPUT_PREFIX = 'input-chunks/'
+    S3_OUTPUT_PREFIX = 'pattern-detections/'
+    
+    # AWS Credentials (Replace with your actual credentials or use environment variables)
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', 'access key')  # Replace with actual key
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', 'secret key')  # Replace with actual secret
+
+    
+    # PostgreSQL Configuration
+    POSTGRES_CONFIG = {
+        'host': 'endpoint',
+        'database': 'postgres',
+        'user': 'postgres',
+        'password': 'password',
+        'port': '5432'
+    }
+    
+    # Google Drive Configuration
+    GDRIVE_FOLDER_ID = 'folder-url'
+    TRANSACTIONS_FILE_ID = 'file-id'  # Replace with actual file ID
+    CUSTOMER_IMPORTANCE_FILE_ID = 'file-id'  # Replace with actual file ID    
+    # Processing Configuration
+    CHUNK_SIZE = 20000  # Increased for faster processing
+    DETECTION_BATCH_SIZE = 50
+    PROCESSING_INTERVAL = 2  # Reduced for faster runtime
+    
+    # Timezone
+    IST = pytz.timezone('Asia/Kolkata')
