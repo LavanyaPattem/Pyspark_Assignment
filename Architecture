@@ -1,0 +1,20 @@
+[Google Drive] --> [Mechanism X]
+    |               |
+    |               v
+    |           [S3 (input-chunks/)]
+    |               |
+    |               v
+    |           [PostgreSQL (transaction_chunks)]
+    |                           |
+    |                           v
+    |                       [Mechanism Y] --> [PySpark (Databricks)]
+    |                           |                 |
+    |                           v                 v
+    |           [S3 (pattern-detections/)]  [PostgreSQL (pattern_detections, merchant_stats, customer_merchant_stats)]
+
+
+    Step 1: Google Drive provides transaction data 
+    Step 2: Mechanism X chunks and uploads to S3 
+    Step 3: PostgreSQL tracks processing status 
+    Step 4: Mechanism Y processes chunks with PySpark 
+    Step 5: Results stored in S3 

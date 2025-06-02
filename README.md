@@ -1,4 +1,3 @@
-Transaction Processing System
 This project implements a transaction processing system using Databricks, AWS S3, and AWS RDS PostgreSQL. It ingests data from Google Drive, processes it, and detects patterns using PySpark.
 Project Structure
 transaction-processing-system/
